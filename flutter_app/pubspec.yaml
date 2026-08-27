@@ -50,7 +50,7 @@ dependencies:
   url_launcher: ^6.3.1
 
   # Notifications — §8.3 pre-expiry license notifications.
-  flutter_local_notifications: ^17.0.0
+  flutter_local_notifications: ^22.3.0
 
   # WiFi & hotspot
   wifi_iot: ^0.3.19
