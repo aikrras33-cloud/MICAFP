@@ -26,7 +26,7 @@ jobs:
     name: Rust (fmt + clippy + test)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -70,7 +70,7 @@ jobs:
     name: Flutter (analyze + test)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-java@v4
         with:
@@ -103,7 +103,7 @@ jobs:
     name: Dashboard (lint + tsc + build)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -128,7 +128,7 @@ jobs:
     name: Extensions (chrome + firefox + shared + wasm)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -164,7 +164,7 @@ jobs:
     name: AI Models (pytest)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v5
         with:
@@ -195,7 +195,7 @@ jobs:
     name: Censorship Simulation (≥95% bypass)
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Launch simulation stack
         run: |
@@ -249,7 +249,7 @@ jobs:
     name: License & Anti-Tamper Tests
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -285,7 +285,7 @@ jobs:
     name: Docker image build
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build unifiedshield:ci image
         run: |
