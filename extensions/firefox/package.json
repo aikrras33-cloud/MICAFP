@@ -12,6 +12,6 @@
   "devDependencies": {
     "@types/chrome": "^0.0.268",
     "typescript": "^5.4.5",
-    "eslint": "^9.3.0"
+    "eslint": "^10.9.0"
   }
 }
