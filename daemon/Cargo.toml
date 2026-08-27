@@ -23,7 +23,7 @@ crossbeam-channel = "0.5"
 
 # ── Cryptography: classical ────────────────────────────────────────────────
 x25519-dalek = { version = "2.0", features = ["serde", "static_secrets"] }
-ed25519-dalek = { version = "2.0", features = ["zeroize", "rand_core"] }
+ed25519-dalek = { version = "3.0", features = ["zeroize", "rand_core"] }
 curve25519-dalek = { version = "4.0", features = ["serde"] }
 hkdf             = "0.12"
 sha2             = "0.10"
