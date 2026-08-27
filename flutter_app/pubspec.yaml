@@ -73,7 +73,7 @@ dependencies:
   vibration: ^2.0.0
 
   # Speech-to-text — §10.3 voice commands.
-  speech_to_text: ^6.6.0
+  speech_to_text: ^7.4.0
 
   # MSIX packaging — §4.1 artifact #9 (Windows store). Optional.
   msix: ^3.16.0
