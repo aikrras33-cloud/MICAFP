@@ -24,7 +24,7 @@ dependencies:
 
   # Storage
   shared_preferences: ^2.3.4
-  flutter_secure_storage: ^9.2.0  # §8 license storage / PIN storage
+  flutter_secure_storage: ^10.3.1  # §8 license storage / PIN storage
 
   # Connectivity & network
   connectivity_plus: ^6.1.2
