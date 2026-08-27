@@ -152,7 +152,7 @@ jobs:
 
       - name: Set up Java (for Android/iOS builds)
         if: ${{ matrix.cell != 'linux-x64' && matrix.cell != 'linux-arm64' && matrix.cell != 'openwrt-cross' }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
