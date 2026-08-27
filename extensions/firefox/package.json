@@ -10,7 +10,7 @@
     "clean": "rm -rf dist/"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.268",
+    "@types/chrome": "^0.2.7",
     "typescript": "^5.4.5",
     "eslint": "^9.3.0"
   }
