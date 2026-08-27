@@ -8,6 +8,6 @@
     "deploy": "fun deploy"
   },
   "devDependencies": {
-    "typescript": "^5.5.0"
+    "typescript": "^7.0.2"
   }
 }
