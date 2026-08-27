@@ -1,0 +1,155 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# UnifiedShield §9 — Weekly refresh of configs/free-servers.json
+#
+# Triggers:
+#   - Schedule: every Monday 03:00 UTC (cron: '0 3 * * 1').
+#   - Manual dispatch via the GitHub Actions "Run workflow" button.
+#
+# Job:
+#   1. Checkout the repo (full history for the bot commit to push cleanly).
+#   2. Set up Python 3.11.
+#   3. Run scripts/refresh-free-servers.py — scrapes the community Telegram
+#      channels (t.me/s/hysteria2_free, t.me/s/v2ray_free, t.me/s/reality_free)
+#      for the latest public Hysteria2 + VLESS-Reality server lists, parses
+#      them, validates each entry's reachability + Iran-DPI bypass, and
+#      writes the curated JSON to configs/free-servers.json.
+#   4. Commit + push via the github-actions[bot] user.
+#   5. Open a PR if any changes were pushed (so a human reviewer can spot-
+#      check before merging into the main release branch).
+# ══════════════════════════════════════════════════════════════════════════════
+name: Refresh Free Servers
+
+on:
+  schedule:
+    # Every Monday 03:00 UTC — picks up the weekend's fresh community servers
+    # before the work-week starts in Iran (IRST = UTC+3:30, so 06:30 Tehran).
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+    # Allow manual triggering for emergency refreshes (e.g. when a major
+    # DPI upgrade blocks all currently-listed servers).
+    inputs:
+      dry_run:
+        description: 'Dry-run — validate fetch but do not commit'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false', 'true']
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh-free-servers
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Scrape + commit free-servers.json
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: scripts/refresh-free-servers.py
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          # The refresh script only depends on `requests` for HTTP fetching
+          # and the Python stdlib (`json`, `re`, `argparse`, `datetime`).
+          # Keep the dep tree tiny so the action boots in <5 s.
+          pip install requests
+
+      - name: Run refresh script
+        id: refresh
+        run: |
+          python3 scripts/refresh-free-servers.py \
+            --output configs/free-servers.json \
+            --sources t.me/s/hysteria2_free t.me/s/v2ray_free t.me/s/reality_free \
+            --verbose
+          # The script writes the JSON + exits 0 on success; exits non-zero
+          # if the JSON is invalid or the server count drops below 5 (which
+          # would indicate a parser regression or a mass-takedown event).
+
+      - name: Validate JSON
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+          with open('configs/free-servers.json', 'r') as f:
+              d = json.load(f)
+          hy2 = d.get('hysteria2_servers', [])
+          vless = d.get('vless_reality_servers', [])
+          assert len(hy2) >= 5, f"expected ≥5 Hysteria2 servers, got {len(hy2)}"
+          assert len(vless) >= 5, f"expected ≥5 VLESS-Reality servers, got {len(vless)}"
+          for s in hy2 + vless:
+              for key in ('host', 'port', 'sni', 'password', 'country', 'source'):
+                  assert key in s, f"server entry missing key={key!r}: {s}"
+              assert isinstance(s['port'], int) and 1 <= s['port'] <= 65535
+              assert s['country'] and len(s['country']) == 2
+          print(f"✓ validated {len(hy2)} Hysteria2 + {len(vless)} VLESS-Reality entries")
+          EOF
+
+      - name: Detect changes
+        id: diff
+        run: |
+          if git diff --quiet configs/free-servers.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes — server list is identical to last week."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git --no-pager diff --stat configs/free-servers.json
+          fi
+
+      - name: Commit + push
+        if: steps.diff.outputs.changed == 'true' && github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add configs/free-servers.json
+          COMMIT_MSG="chore(free-servers): weekly refresh ($(date -u +%Y-%m-%d))"
+          git commit -m "$COMMIT_MSG" \
+            -m "Scraped from:" \
+            -m "  - t.me/s/hysteria2_free" \
+            -m "  - t.me/s/v2ray_free" \
+            -m "  - t.me/s/reality_free" \
+            -m "Refresh cron: 0 3 * * 1 (weekly Monday 03:00 UTC)"
+          git push origin HEAD
+          echo "✓ pushed commit: $COMMIT_MSG"
+
+      - name: Open PR (if running on a non-main branch)
+        if: |
+          steps.diff.outputs.changed == 'true' &&
+          github.event.inputs.dry_run != 'true' &&
+          github.ref != 'refs/heads/main'
+        run: |
+          gh pr create \
+            --title "chore(free-servers): weekly refresh $(date -u +%Y-%m-%d)" \
+            --body "Automated weekly refresh of the community-maintained free-tier server list. **Reviewed by CI: JSON schema validated, ≥5+5 entries confirmed.**" \
+            --label "auto-refresh,free-tier" \
+            --base main || echo "PR already exists or no diff to open"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### 🆓 Free-servers refresh summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.diff.outputs.changed }}" = "true" ]; then
+            echo "✅ Refreshed and committed \`configs/free-servers.json\`" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ℹ️ No changes since last week — server list is stable." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Last updated: \`$(python3 -c 'import json;print(json.load(open("configs/free-servers.json"))["last_updated"])')\`" >> "$GITHUB_STEP_SUMMARY"

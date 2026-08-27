@@ -1,0 +1,110 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# MICAFP-UnifiedShield Enterprise v9.0.0-enterprise — Dependabot
+# Weekly dependency updates across 4 ecosystems (npm, cargo, github-actions, pub)
+# ══════════════════════════════════════════════════════════════════════════════
+version: 2
+
+updates:
+  # ── npm — dashboard, browser extensions, CDN workers ──────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/dashboard"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["deps", "npm", "dashboard"]
+    commit-message:
+      prefix: "deps(dashboard)"
+    groups:
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      next:
+        patterns: ["next", "eslint-config-next", "@next/*"]
+      ui:
+        patterns: ["@radix-ui/*", "tailwindcss", "class-variance-authority", "clsx", "tailwind-merge"]
+
+  - package-ecosystem: "npm"
+    directory: "/extensions/chrome"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["deps", "npm", "chrome"]
+
+  - package-ecosystem: "npm"
+    directory: "/extensions/firefox"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["deps", "npm", "firefox"]
+
+  - package-ecosystem: "npm"
+    directory: "/extensions/shared"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["deps", "npm", "shared"]
+
+  # ── npm — workers/* (iterate over each worker) ─────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/workers/cloudflare"
+    schedule: { interval: "weekly" }
+    labels: ["deps", "npm", "workers", "cloudflare"]
+  - package-ecosystem: "npm"
+    directory: "/workers/alibaba-cdn"
+    schedule: { interval: "weekly" }
+    labels: ["deps", "npm", "workers", "alibaba"]
+  - package-ecosystem: "npm"
+    directory: "/workers/arvan-cdn"
+    schedule: { interval: "weekly" }
+    labels: ["deps", "npm", "workers", "arvan"]
+  - package-ecosystem: "npm"
+    directory: "/workers/baidu-cdn"
+    schedule: { interval: "weekly" }
+    labels: ["deps", "npm", "workers", "baidu"]
+  - package-ecosystem: "npm"
+    directory: "/workers/bytedance-cdn"
+    schedule: { interval: "weekly" }
+    labels: ["deps", "npm", "workers", "bytedance"]
+  - package-ecosystem: "npm"
+    directory: "/workers/huawei-cdn"
+    schedule: { interval: "weekly" }
+    labels: ["deps", "npm", "workers", "huawei"]
+  - package-ecosystem: "npm"
+    directory: "/workers/tencent-cdn"
+    schedule: { interval: "weekly" }
+    labels: ["deps", "npm", "workers", "tencent"]
+  - package-ecosystem: "npm"
+    directory: "/workers/universal"
+    schedule: { interval: "weekly" }
+    labels: ["deps", "npm", "workers", "universal"]
+
+  # ── Cargo — workspace ───────────────────────────────────────────────────────
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["deps", "cargo"]
+    commit-message:
+      prefix: "deps(cargo)"
+
+  # ── GitHub Actions — workflows ───────────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["deps", "github-actions"]
+    commit-message:
+      prefix: "deps(ci)"
+
+  # ── pub — Flutter app ───────────────────────────────────────────────────────
+  - package-ecosystem: "pub"
+    directory: "/flutter_app"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["deps", "pub", "flutter"]
+    commit-message:
+      prefix: "deps(flutter)"

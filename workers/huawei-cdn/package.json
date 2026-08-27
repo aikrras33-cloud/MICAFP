@@ -1,0 +1,13 @@
+{
+  "name": "@unifiedshield/workers-huawei-cdn",
+  "version": "9.0.0-enterprise",
+  "description": "UnifiedShield CDN relay worker for Huawei Cloud FunctionGraph (Chinese CDN — not blocked in Iran)",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,68 @@
+# =============================================================================
+# MICAFP-UnifiedShield-Enterprise (v9.0.0-enterprise)
+# Censorship Simulation Environment — Iran Firewall Container
+#
+# Builds the `iran-firewall` service defined in docker-compose.yml.
+# The container:
+#   1. Applies iptables rules (firewall-rules.sh) that mimic Iran's national
+#      firewall (DNS-poisoned IP blocks, WireGuard/OpenVPN/Shadowsocks drops,
+#      coarse SNI-based REJECT for TLS RST simulation).
+#   2. Hands off to iran_dpi_simulator.py, which performs the userspace FAVA
+#      DPI simulation (Scapy-based TLS-RST injection, HTTP 403 injection, DNS
+#      poisoning, and protocol fingerprinting).
+#
+# The container must run privileged (or with NET_ADMIN + SYS_MODULE caps) so
+# that iptables can manipulate the kernel netfilter tables.
+# =============================================================================
+
+FROM debian:12-slim
+
+# iptables manipulation requires root. The directive mandates USER root.
+USER root
+
+# -----------------------------------------------------------------------------
+# Install runtime dependencies:
+#   iptables              — kernel netfilter rule manipulation
+#   netfilter-persistent  — persist rules across restarts (best-effort)
+#   python3               — runtime for iran_dpi_simulator.py
+#   python3-scapy         — Scapy packet manipulation (RST/DNS-poison injection)
+#   python3-pip           — for installing any additional pure-Python deps
+#   dnsutils (dig)        — resolve blocked domains to IPs for OUTPUT DROP rules
+#   jq                    — parse block_patterns.json at runtime
+#   iproute2              — debugging (ip, ss)
+#   procps                — debugging (ps, pgrep)
+# -----------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        iptables \
+        netfilter-persistent \
+        python3 \
+        python3-scapy \
+        python3-pip \
+        dnsutils \
+        jq \
+        iproute2 \
+        procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# -----------------------------------------------------------------------------
+# Copy the firewall rules and DPI simulator into the container.
+# When run via docker-compose.yml, firewall-rules.sh is also bind-mounted
+# read-only as /firewall-rules.sh (volume mount shadows this COPY); the
+# COPY provides a fallback for standalone `docker run` invocations.
+# -----------------------------------------------------------------------------
+WORKDIR /root
+
+COPY firewall-rules.sh     /firewall-rules.sh
+COPY iran_dpi_simulator.py /iran_dpi_simulator.py
+COPY block_patterns.json   /block_patterns.json
+
+RUN chmod +x /firewall-rules.sh
+
+# -----------------------------------------------------------------------------
+# Entrypoint: apply iptables rules, then exec the CMD (iran_dpi_simulator.py).
+# docker-compose.yml overrides this with `entrypoint: ["/bin/bash", "/firewall-rules.sh"]`
+# but the Dockerfile's CMD is still forwarded as args to the compose entrypoint,
+# so `exec "$@"` at the end of firewall-rules.sh launches the DPI simulator.
+# -----------------------------------------------------------------------------
+ENTRYPOINT ["/firewall-rules.sh"]
+CMD ["python3", "/iran_dpi_simulator.py", "--host", "0.0.0.0", "--port", "8443"]

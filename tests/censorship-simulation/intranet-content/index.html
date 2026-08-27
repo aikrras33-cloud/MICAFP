@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<!--
+  =============================================================================
+  MICAFP-UnifiedShield-Enterprise (v9.0.0-enterprise)
+  Censorship Simulation Environment — Mock Iranian Intranet
+  File:  intranet-content/index.html
+  Host:  ap.shaparak.ir  (Iranian national payment gateway — Shaparak)
+  IP:    10.202.0.10    (national-intranet-mock container on shield-net)
+  =============================================================================
+  This page mimics the Iranian Shaparak payment gateway (ap.shaparak.ir) for
+  UnifiedShield intranet-aware routing tests. All content is fake; no real
+  banking data is involved.
+  =============================================================================
+-->
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="شاپرک - درگاه پرداخت الکترونیکی">
+    <title>شاپرک - درگاه پرداخت</title>
+    <style>
+        /* Vazirmatn preferred (loaded locally if installed in the container);
+           fallback to Tahoma / IRANSans / system sans-serif. */
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: local('Vazirmatn'), local('Vazir'), local('IRANSans');
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Vazirmatn', 'Tahoma', 'IRANSans', 'B Nazanin', sans-serif;
+            background: #f4f6f9;
+            color: #2c3e50;
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            color: #ffffff;
+            padding: 1.2rem 2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+        }
+        header .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+        header .logo {
+            width: 44px;
+            height: 44px;
+            background: #ffffff;
+            color: #1b5e20;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+        header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        header .subtitle {
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 2.5rem 1rem;
+        }
+        .payment-card {
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+        }
+        .payment-card h2 {
+            color: #1b5e20;
+            font-size: 1.25rem;
+            margin-bottom: 0.4rem;
+            text-align: center;
+        }
+        .payment-card .merchant {
+            text-align: center;
+            color: #5f6b7a;
+            font-size: 0.92rem;
+            margin-bottom: 1.6rem;
+        }
+        .amount-box {
+            background: #f1f8e9;
+            border: 1px solid #c5e1a5;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1.6rem;
+        }
+        .amount-box .label {
+            font-size: 0.82rem;
+            color: #5f6b7a;
+            margin-bottom: 0.35rem;
+        }
+        .amount-box .amount {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #1b5e20;
+        }
+        .amount-box .rial {
+            font-size: 0.78rem;
+            color: #5f6b7a;
+            margin-top: 0.2rem;
+        }
+        .form-group {
+            margin-bottom: 1.1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.88rem;
+            color: #34495e;
+            margin-bottom: 0.35rem;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            background: #fafbfc;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            text-align: left;
+            direction: ltr;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+        }
+        .form-row {
+            display: flex;
+            gap: 0.7rem;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .pay-button {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.6rem;
+            transition: transform 0.1s ease, box-shadow 0.15s ease;
+        }
+        .pay-button:hover {
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.35);
+        }
+        .pay-button:active {
+            transform: translateY(1px);
+        }
+        .footer-note {
+            margin-top: 1.4rem;
+            text-align: center;
+            font-size: 0.78rem;
+            color: #8a94a3;
+            line-height: 1.6;
+        }
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 0.35rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            margin-top: 0.8rem;
+        }
+        footer {
+            background: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.82rem;
+        }
+        footer a {
+            color: #81c784;
+            text-decoration: none;
+        }
+        .captcha {
+            background: repeating-linear-gradient(45deg, #fafbfc 0 6px, #f0f4f8 6px 12px);
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 0.5rem 0.7rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 0.25rem;
+            color: #34495e;
+            text-align: center;
+            margin-bottom: 0.4rem;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <div class="logo">ش</div>
+            <div>
+                <h1>شاپرک</h1>
+                <div class="subtitle">درگاه پرداخت الکترونیکی ایران</div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="payment-card">
+            <h2>پرداخت سفارش</h2>
+            <div class="merchant">فروشگاه نمونهUnifiedShield</div>
+
+            <div class="amount-box">
+                <div class="label">مبلغ قابل پرداخت</div>
+                <div class="amount">۱۲۵۰٬۰۰۰</div>
+                <div class="rial">ریال</div>
+            </div>
+
+            <form id="payment-form" action="/process-payment" method="post" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="card-number">شماره کارت</label>
+                    <input
+                        type="text"
+                        id="card-number"
+                        name="card_number"
+                        inputmode="numeric"
+                        maxlength="19"
+                        placeholder="6037-XXXX-XXXX-XXXX"
+                        autocomplete="off"
+                        required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="exp-month">ماه انقضا</label>
+                        <input
+                            type="text"
+                            id="exp-month"
+                            name="exp_month"
+                            inputmode="numeric"
+                            maxlength="2"
+                            placeholder="۰۷"
+                            autocomplete="off"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="exp-year">سال انقضا</label>
+                        <input
+                            type="text"
+                            id="exp-year"
+                            name="exp_year"
+                            inputmode="numeric"
+                            maxlength="2"
+                            placeholder="۰۳"
+                            autocomplete="off"
+                            required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cvv2">CVV2</label>
+                        <input
+                            type="password"
+                            id="cvv2"
+                            name="cvv2"
+                            inputmode="numeric"
+                            maxlength="4"
+                            placeholder="••••"
+                            autocomplete="off"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label for="captcha">کد امنیتی</label>
+                        <div class="captcha" id="captcha-text">۷۹۳۱</div>
+                        <input
+                            type="text"
+                            id="captcha"
+                            name="captcha"
+                            inputmode="numeric"
+                            maxlength="4"
+                            placeholder="کد بالا را وارد کنید"
+                            autocomplete="off"
+                            required>
+                    </div>
+                </div>
+
+                <button type="submit" class="pay-button" id="pay-btn">پرداخت</button>
+            </form>
+
+            <div class="footer-note">
+                <div class="security-badge">🔒 پرداخت امن با رمزنگاری SSL</div>
+                <p style="margin-top: 0.8rem;">
+                    این یک صفحه شبیه‌سازی برای тест UnifiedShield است.<br>
+                    هیچ تراکنش بانکی واقعی انجام نمی‌شود.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© ۱۴۰۳ شاپرک — شبکه ملی پرداخت الکترونیکی ایران (شبیه‌سازی)</p>
+        <p style="margin-top: 0.3rem;"><a href="#">قوانین و مقررات</a> · <a href="#">پشتیبانی</a></p>
+    </footer>
+
+    <script>
+        // Format the card number with dashes as the user types.
+        (function() {
+            var cardInput = document.getElementById('card-number');
+            cardInput.addEventListener('input', function(e) {
+                var v = e.target.value.replace(/\D/g, '').slice(0, 16);
+                var formatted = v.replace(/(.{4})/g, '$1-').replace(/-$/, '');
+                e.target.value = formatted;
+            });
+        })();
+    </script>
+</body>
+</html>

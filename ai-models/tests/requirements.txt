@@ -1,0 +1,23 @@
+# Test-scaffold requirements for ai-models/tests/ (GEMINI-ENG-DIR-V1.0 §3.13).
+#
+# These are the additional Python packages needed to RUN the smoke tests in
+# this directory. They sit on top of the train/quantize pipeline dependencies
+# declared in:
+#   - ai-models/train/requirements.txt        (torch, numpy, onnx, onnxruntime, scapy)
+#   - the implicit runtime needs of adversarial_traffic_gan.py (tensorboard)
+#
+# Install BOTH files in a clean venv before running:
+#   pip install -r ai-models/train/requirements.txt
+#   pip install -r ai-models/tests/requirements.txt
+#   pip install tensorboard        # required by adversarial_traffic_gan.py top-level import
+#
+# Then invoke the smoke suite:
+#   pytest ai-models/tests/ -v
+# or filter to only smoke-marked tests:
+#   pytest ai-models/tests/ -v -m smoke
+
+pytest>=7.0
+pytest-cov>=4.0
+pytest-mock>=3.0
+scikit-learn>=1.3        # used by future sklearn-based fixtures + utilities
+pandas>=2.0              # used by future DataFrame-based test fixtures

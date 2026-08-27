@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<!--
+  =============================================================================
+  MICAFP-UnifiedShield-Enterprise (v9.0.0-enterprise)
+  Censorship Simulation Environment — Mock Iranian Intranet
+  File:  intranet-content/bmi.html
+  Host:  bmi.ir  (Bank Melli Iran — Iranian national bank)
+  IP:    10.202.0.10    (national-intranet-mock container on shield-net)
+  =============================================================================
+  This page mimics the Bank Melli Iran (bmi.ir) online banking login screen
+  for UnifiedShield intranet-aware routing tests. All content is fake; no real
+  banking credentials are involved.
+  =============================================================================
+-->
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="بانک ملی ایران - ورود به سیستم بانکداری اینترنتی">
+    <title>بانک ملی ایران - ورود</title>
+    <style>
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: local('Vazirmatn'), local('Vazir'), local('IRANSans');
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Vazirmatn', 'Tahoma', 'IRANSans', 'B Nazanin', sans-serif;
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(8px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1100px;
+            margin: 0 auto;
+            gap: 1rem;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .bank-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            color: #ffd54f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .brand-text h1 {
+            font-size: 1.2rem;
+            color: #0d47a1;
+            font-weight: 700;
+        }
+        .brand-text .latin {
+            font-size: 0.78rem;
+            color: #5f6b7a;
+            letter-spacing: 0.05em;
+        }
+        .header-links {
+            display: flex;
+            gap: 1.2rem;
+            font-size: 0.88rem;
+        }
+        .header-links a {
+            color: #0d47a1;
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .header-links a:hover {
+            color: #1565c0;
+        }
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+            width: 100%;
+        }
+        .login-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 440px;
+            padding: 2.5rem 2rem;
+        }
+        .login-card .card-header {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+        .login-card .card-header h2 {
+            color: #0d47a1;
+            font-size: 1.4rem;
+            margin-bottom: 0.3rem;
+        }
+        .login-card .card-header .sub {
+            color: #5f6b7a;
+            font-size: 0.85rem;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.88rem;
+            color: #34495e;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper input {
+            width: 100%;
+            padding: 0.75rem 0.9rem 0.75rem 2.5rem;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            background: #fafbfc;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            text-align: left;
+            direction: ltr;
+        }
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #1565c0;
+            box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
+        }
+        .input-wrapper .icon {
+            position: absolute;
+            left: 0.7rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            color: #8a94a3;
+        }
+        .captcha-box {
+            background: repeating-linear-gradient(45deg, #fafbfc 0 6px, #f0f4f8 6px 12px);
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 0.6rem;
+            text-align: center;
+            margin-bottom: 0.4rem;
+        }
+        .captcha-box .code {
+            font-family: 'Courier New', monospace;
+            font-size: 1.4rem;
+            letter-spacing: 0.4rem;
+            color: #34495e;
+            text-decoration: line-through;
+            text-decoration-color: rgba(21, 101, 192, 0.5);
+            text-decoration-thickness: 2px;
+            user-select: none;
+        }
+        .captcha-box .label {
+            font-size: 0.7rem;
+            color: #8a94a3;
+            margin-top: 0.2rem;
+        }
+        .login-button {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.4rem;
+            transition: transform 0.1s, box-shadow 0.15s;
+        }
+        .login-button:hover {
+            box-shadow: 0 6px 16px rgba(13, 71, 161, 0.35);
+        }
+        .login-button:active {
+            transform: translateY(1px);
+        }
+        .form-row {
+            display: flex;
+            gap: 0.7rem;
+            align-items: end;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .form-row .captcha-col {
+            flex: 0 0 130px;
+        }
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0 1.4rem;
+            font-size: 0.82rem;
+        }
+        .form-options label {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: #34495e;
+            cursor: pointer;
+        }
+        .form-options a {
+            color: #1565c0;
+            text-decoration: none;
+        }
+        .form-options a:hover {
+            text-decoration: underline;
+        }
+        .login-card .security-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 1.6rem;
+            font-size: 0.78rem;
+            color: #8a94a3;
+        }
+        .security-row .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+        }
+        .disclaimer {
+            text-align: center;
+            margin-top: 1.2rem;
+            font-size: 0.75rem;
+            color: #8a94a3;
+            line-height: 1.6;
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 6px;
+            padding: 0.6rem;
+        }
+        footer {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.25);
+            color: #ffffff;
+            text-align: center;
+            padding: 0.9rem;
+            font-size: 0.8rem;
+        }
+        footer a {
+            color: #90caf9;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="brand">
+                <div class="bank-logo">بم</div>
+                <div class="brand-text">
+                    <h1>بانک ملی ایران</h1>
+                    <div class="latin">Bank Melli Iran — bmi.ir</div>
+                </div>
+            </div>
+            <div class="header-links">
+                <a href="#">صفحه نخست</a>
+                <a href="#">شماره حساب</a>
+                <a href="#">پشتیبانی</a>
+                <a href="#">انگلیسی</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="login-card">
+            <div class="card-header">
+                <h2>ورود به سیستم بانکداری اینترنتی</h2>
+                <div class="sub">برای دسترسی به حساب خود، اطلاعات کاربری را وارد کنید</div>
+            </div>
+
+            <form id="login-form" action="/login" method="post" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="username">نام کاربری / کد ملی</label>
+                    <div class="input-wrapper">
+                        <span class="icon">👤</span>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="نام کاربری"
+                            autocomplete="username"
+                            required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">رمز عبور</label>
+                    <div class="input-wrapper">
+                        <span class="icon">🔒</span>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="رمز عبور"
+                            autocomplete="current-password"
+                            required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group captcha-col">
+                        <label for="captcha-input">کد امنیتی</label>
+                        <input
+                            type="text"
+                            id="captcha-input"
+                            name="captcha"
+                            inputmode="numeric"
+                            maxlength="5"
+                            placeholder="کد کپچا"
+                            autocomplete="off"
+                            required>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>&nbsp;</label>
+                        <div class="captcha-box">
+                            <div class="code" id="captcha-code">۴۸۲۹۳</div>
+                            <div class="label">کد را وارد کنید</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label>
+                        <input type="checkbox" name="remember" value="1">
+                        مرا به خاطر بسپار
+                    </label>
+                    <a href="#">فراموشی رمز عبور؟</a>
+                </div>
+
+                <button type="submit" class="login-button" id="login-btn">ورود</button>
+            </form>
+
+            <div class="security-row">
+                <span class="badge">🛡️ احراز هویت دومرحله‌ای</span>
+                <span class="badge">🔑 رمزنگاری SSL</span>
+            </div>
+
+            <div class="disclaimer">
+                ⚠️ این یک صفحه شبیه‌سازی برای تست‌های UnifiedShield است.<br>
+                هیچ اطلاعات بانکی واقعی در این صفحه پردازش نمی‌شود.
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© ۱۴۰۳ بانک ملی ایران — کلیه حقوق محفوظ است (شبیه‌سازی)</p>
+        <p style="margin-top: 0.25rem;">
+            <a href="#">حریم خصوصی</a> · <a href="#">قوانین</a> · <a href="#">تماس با ما</a>
+        </p>
+    </footer>
+
+    <script>
+        // Toggle password visibility (simple UX touch for realism)
+        (function() {
+            // Auto-uppercase Persian digit captcha code for consistency.
+            var captchaInput = document.getElementById('captcha-input');
+            captchaInput.addEventListener('input', function(e) {
+                var v = e.target.value;
+                e.target.value = v;  // no transform — keep raw input.
+            });
+
+            var form = document.getElementById('login-form');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var btn = document.getElementById('login-btn');
+                btn.textContent = 'در حال ورود...';
+                btn.disabled = true;
+                // NOTE: simulation only — no real submit.
+                setTimeout(function() {
+                    btn.textContent = 'ورود';
+                    btn.disabled = false;
+                    alert('شبیه‌سازی UnifiedShield: این درگاه واقعی نیست.');
+                }, 800);
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package unifiedshield.v1;
+
+// IPC message types for the daemon <-> Flutter / native apps.
+// Used by daemon/build.rs prost-build to generate Rust types.
+//
+// Generated Rust types land in daemon/src/proto_gen/ and are re-exported
+// from the `unifiedshield::proto_gen` module (see daemon/src/lib.rs).
+
+message ConnectRequest {
+  string transport_id = 1;
+  string core_id = 2;
+  optional string endpoint = 3;
+  bool ai_auto_select = 4;
+}
+
+message ConnectResponse {
+  bool ok = 1;
+  string session_id = 2;
+  string error = 3;
+  string active_transport = 4;
+  string active_core = 5;
+}
+
+message DisconnectRequest {}
+message DisconnectResponse { bool ok = 1; }
+
+message StatusRequest {}
+message StatusResponse {
+  string state = 1;            // "connected" | "connecting" | "disconnected" | "error"
+  uint64 bytes_up = 2;
+  uint64 bytes_down = 3;
+  uint32 latency_ms = 4;
+  string active_transport = 5;
+  string active_core = 6;
+  string active_endpoint = 7;
+  uint32 connected_for_secs = 8;
+}
+
+message SwitchCoreRequest { string core_id = 1; }
+message SwitchCoreResponse { bool ok = 1; string error = 2; }
+
+message ListCoresRequest {}
+message ListCoresResponse { repeated CoreInfo cores = 1; }
+message CoreInfo {
+  string id = 1;
+  string name = 2;
+  bool is_free_tier = 3;
+  string description = 4;
+}
+
+// License
+message ValidateLicenseRequest { string serial = 1; string org = 2; }
+message ValidateLicenseResponse {
+  bool valid = 1;
+  string reason = 2;
+  int64 expiry_ms = 3;
+  string tier = 4;
+}
+
+message GetLicenseInfoRequest {}
+message GetLicenseInfoResponse {
+  string serial = 1;
+  string org = 2;
+  int64 expiry_ms = 3;
+  string tier = 4;
+  int64 value_usd = 5;
+  bool valid = 6;
+}
+
+// AI
+message AiQueryRequest { string prompt = 1; bool use_cloud = 2; }
+message AiQueryResponse { string text = 1; }
+
+service UnifiedShield {
+  rpc Connect(ConnectRequest) returns (ConnectResponse);
+  rpc Disconnect(DisconnectRequest) returns (DisconnectResponse);
+  rpc Status(StatusRequest) returns (StatusResponse);
+  rpc SwitchCore(SwitchCoreRequest) returns (SwitchCoreResponse);
+  rpc ListCores(ListCoresRequest) returns (ListCoresResponse);
+  rpc ValidateLicense(ValidateLicenseRequest) returns (ValidateLicenseResponse);
+  rpc GetLicenseInfo(GetLicenseInfoRequest) returns (GetLicenseInfoResponse);
+  rpc AiQuery(AiQueryRequest) returns (AiQueryResponse);
+}

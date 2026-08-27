@@ -1,0 +1,13 @@
+{
+  "name": "shield-bytedance-worker",
+  "version": "9.0.0-enterprise",
+  "description": "Shield CDN Worker for ByteDance Volcengine EdgeRoutine (Chinese CDN - not blocked in Iran)",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "deploy": "vecl edge deploy"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

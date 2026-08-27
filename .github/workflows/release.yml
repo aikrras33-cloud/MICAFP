@@ -1,0 +1,358 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# MICAFP-UnifiedShield Enterprise v9.0.0-enterprise — Release Pipeline
+# 12-cell platform matrix → collect → sign → release → deploy
+# Triggered by push on `v*` tags.
+# ══════════════════════════════════════════════════════════════════════════════
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      note:
+        description: "Release note (optional)"
+        required: false
+        default: "Manual enterprise build"
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RELEASE_VERSION: 9.0.0-enterprise
+
+jobs:
+  # ══════════════════════════════════════════════════════════════════════════════
+  # 12-cell build matrix — produces 18 release artifacts
+  # ══════════════════════════════════════════════════════════════════════════════
+  build:
+    name: Build (${{ matrix.cell }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ── Android (5 cells) ───────────────────────────────────────────────
+          - cell: android-universal
+            os: ubuntu-22.04
+            rust_targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+            make_target: release-android
+            setup_flutter: "true"
+          - cell: android-arm64
+            os: ubuntu-22.04
+            rust_targets: aarch64-linux-android
+            make_target: release-android
+            setup_flutter: "true"
+          - cell: android-arm32
+            os: ubuntu-22.04
+            rust_targets: armv7-linux-androideabi
+            make_target: release-android
+            setup_flutter: "true"
+          - cell: android-x64
+            os: ubuntu-22.04
+            rust_targets: x86_64-linux-android
+            make_target: release-android
+            setup_flutter: "true"
+          - cell: android-x86
+            os: ubuntu-22.04
+            rust_targets: i686-linux-android
+            make_target: release-android
+            setup_flutter: "true"
+          # ── iOS (3 cells, M1 macOS) ─────────────────────────────────────────
+          - cell: ios-device
+            os: macos-14
+            rust_targets: aarch64-apple-ios
+            make_target: release-ios
+            setup_flutter: "true"
+          - cell: ios-simulator
+            os: macos-14
+            rust_targets: aarch64-apple-ios-sim
+            make_target: release-ios
+            setup_flutter: "true"
+          - cell: macos-universal
+            os: macos-14
+            rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+            make_target: release-macos
+            setup_flutter: "true"
+          # ── Windows (1 cell) ─────────────────────────────────────────────────
+          - cell: windows-x64
+            os: windows-2022
+            rust_targets: x86_64-pc-windows-msvc
+            make_target: release-windows
+            setup_flutter: "true"
+          # ── Linux (2 cells) ──────────────────────────────────────────────────
+          - cell: linux-x64
+            os: ubuntu-22.04
+            rust_targets: x86_64-unknown-linux-gnu
+            make_target: release-linux
+            setup_flutter: "true"
+          - cell: linux-arm64
+            os: ubuntu-22.04
+            rust_targets: aarch64-unknown-linux-gnu
+            make_target: release-linux
+            setup_flutter: "false"
+          # ── OpenWrt (1 cell, cross) ──────────────────────────────────────────
+          - cell: openwrt-cross
+            os: ubuntu-22.04
+            rust_targets: mipsel-unknown-linux-musl,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl
+            make_target: release-openwrt
+            setup_flutter: "false"
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+
+      - name: Set up Flutter (skip for openwrt)
+        if: ${{ matrix.setup_flutter == 'true' }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.1"
+          channel: stable
+
+      # Self-healing preflight — fail fast with a precise, readable report.
+      - name: Preflight — flutter doctor + analyze gate
+        if: ${{ matrix.setup_flutter == 'true' }}
+        run: |
+          flutter doctor -v
+          cd flutter_app
+          flutter pub get
+          # Analyze must be clean (errors would abort the build later anyway);
+          # treat analyzer *errors* as fatal, infos are tolerated.
+          flutter analyze --no-pub 2>&1 | tee analyze.log || true
+          if grep -qE "^\s*error\s+•" analyze.log; then
+            echo "::error::flutter analyze reported errors — see analyze.log"
+            exit 1
+          fi
+          echo "::notice::flutter analyze clean"
+
+      # Linux GUI builds need the GTK toolchain.
+      - name: Install Linux desktop toolchain (GTK + appimagetool)
+        if: ${{ matrix.cell == 'linux-x64' }}
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            libgtk-3-dev libblkid-dev liblzma-dev \
+            ninja-build build-essential pkg-config clang cmake \
+            libfuse2 desktop-file-utils
+          # appimagetool for the AppImage packaging step
+          sudo curl -sL -o /usr/local/bin/appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          sudo chmod +x /usr/local/bin/appimagetool
+          /usr/local/bin/appimagetool --version || true
+
+      - name: Set up Java (for Android/iOS builds)
+        if: ${{ matrix.cell != 'linux-x64' && matrix.cell != 'linux-arm64' && matrix.cell != 'openwrt-cross' }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.cell }}
+
+      - name: Cache pub + gradle
+        if: ${{ matrix.setup_flutter == 'true' }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-pub-gradle-${{ matrix.cell }}-${{ hashFiles('**/pubspec.lock', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-gradle-${{ matrix.cell }}-
+            ${{ runner.os }}-pub-gradle-
+
+      - name: Run make ${{ matrix.make_target }}
+        env:
+          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
+        run: make ${{ matrix.make_target }}
+
+      - name: Upload build logs (on failure)
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-logs-${{ matrix.cell }}
+          path: |
+            flutter_app/analyze.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.cell }}
+          path: release/**
+          retention-days: 30
+          if-no-files-found: warn
+
+  # ══════════════════════════════════════════════════════════════════════════════
+  # release-collect — aggregate 12 cells, generate SHA256SUMS + minisign sig +
+  # VERSION.txt, then publish GitHub Release.
+  # ══════════════════════════════════════════════════════════════════════════════
+  release-collect:
+    name: Collect, Sign & Publish GitHub Release
+    needs: [build]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name  "unifiedshield-bot"
+          git config user.email "bot@unifiedshield.local"
+
+      - name: Install minisign
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y minisign jq
+
+      - name: Download all 12 cell artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: collected
+          merge-multiple: false
+
+      - name: Flatten artifacts into release/
+        run: |
+          mkdir -p release
+          find collected -type f \( \
+            -name '*.apk'  -o -name '*.aab'  -o \
+            -name '*.ipa'  -o \
+            -name '*.pkg'  -o -name '*.dmg'  -o \
+            -name '*.exe'  -o -name '*.msix' -o -name '*.zip' -o \
+            -name '*.AppImage' -o -name '*.deb' -o -name '*.rpm' -o \
+            -name '*.ipk'  -o \
+            -name '*.xpi'  -o \
+            -name '*.wasm' \
+          \) -exec cp -v {} release/ \; || true
+
+      - name: Generate SHA256SUMS
+        run: |
+          cd release
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Sign SHA256SUMS with minisign
+        env:
+          MINISIGN_PRIVATE_KEY: ${{ secrets.MINISIGN_PRIVATE_KEY }}
+          MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}
+        run: |
+          # Materialize the private key from the secret, then sign
+          if [ -z "$MINISIGN_PRIVATE_KEY" ]; then
+            echo "::warning::MINISIGN_PRIVATE_KEY secret not set — skipping minisign signature"
+            exit 0
+          fi
+          printf '%s\n' "$MINISIGN_PRIVATE_KEY" > /tmp/minisign.key
+          chmod 600 /tmp/minisign.key
+          if [ -n "$MINISIGN_PASSWORD" ]; then
+            printf '%s\n' "$MINISIGN_PASSWORD" | minisign -S -s /tmp/minisign.key \
+              -m release/SHA256SUMS -x release/SHA256SUMS.minisig
+          else
+            minisign -S -s /tmp/minisign.key -m release/SHA256SUMS -x release/SHA256SUMS.minisig
+          fi
+          rm -f /tmp/minisign.key
+
+      - name: Generate VERSION.txt
+        env:
+          GIT_TAG: ${{ github.ref_name }}
+        run: |
+          {
+            echo "UnifiedShield Enterprise $GIT_TAG"
+            echo "Build commit: ${{ github.sha }}"
+            echo "Build date:   $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo ""
+            echo "=== Artifacts ==="
+            ( cd release && for f in *; do
+                [ "$f" = "SHA256SUMS" ] && continue
+                [ "$f" = "SHA256SUMS.minisig" ] && continue
+                SHA=$(sha256sum "release/$f" | awk '{print $1}')
+                if [ -f "release/$f.minisig" ]; then
+                  SIG="(minisign signed)"
+                else
+                  SIG=""
+                fi
+                printf '  %-50s %s %s\n' "$f" "$SHA" "$SIG"
+              done )
+            echo ""
+            echo "=== Verification ==="
+            echo "  sha256sum -c SHA256SUMS"
+            echo "  minisign -V -m SHA256SUMS -x SHA256SUMS.minisig"
+          } > release/VERSION.txt
+          cat release/VERSION.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: UnifiedShield ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          files: |
+            release/*
+          fail_on_unmatched_files: false
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+
+  # ══════════════════════════════════════════════════════════════════════════════
+  # deploy-dashboard — Vercel + 9 CDN workers via deploy.sh
+  # ══════════════════════════════════════════════════════════════════════════════
+  deploy-dashboard:
+    name: Deploy Dashboard + CDN Workers
+    needs: release-collect
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Deploy dashboard to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::warning::VERCEL_TOKEN secret not set — skipping dashboard deploy"
+            exit 0
+          fi
+          cd dashboard && vercel --prod --yes --token="$VERCEL_TOKEN"
+
+      - name: Deploy 9 CDN workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ALIBABA_ACCESS_KEY_ID: ${{ secrets.ALIBABA_ACCESS_KEY_ID }}
+          ALIBABA_ACCESS_KEY_SECRET: ${{ secrets.ALIBABA_ACCESS_KEY_SECRET }}
+          TENCENT_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENT_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+          BAIDU_AK: ${{ secrets.BAIDU_AK }}
+          BAIDU_SK: ${{ secrets.BAIDU_SK }}
+          HUAWEI_AK: ${{ secrets.HUAWEI_AK }}
+          HUAWEI_SK: ${{ secrets.HUAWEI_SK }}
+          ARVAN_API_KEY: ${{ secrets.ARVAN_API_KEY }}
+          BYTEDANCE_AK: ${{ secrets.BYTEDANCE_AK }}
+          BYTEDANCE_SK: ${{ secrets.BYTEDANCE_SK }}
+        run: |
+          if [ ! -x deploy.sh ]; then chmod +x deploy.sh; fi
+          ./deploy.sh || echo "::warning::deploy.sh failed — see logs"

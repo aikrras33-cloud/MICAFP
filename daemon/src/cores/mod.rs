@@ -1,0 +1,42 @@
+pub mod amneziavpn;
+pub mod core_manager;
+pub mod defyx;
+pub mod hiddify;
+pub mod hysteria2_community;
+pub mod lantern;
+pub mod mahsang;
+pub mod moav;
+pub mod psiphon;
+pub mod singbox;
+pub mod tor_snowflake;
+pub mod vless_reality_community;
+pub mod xray;
+
+pub use amneziavpn::AmneziaVpnAdapter;
+pub use core_manager::CoreManager;
+pub use defyx::DefyxVpnAdapter;
+pub use hiddify::HiddifyCoreAdapter;
+pub use hysteria2_community::Hysteria2CommunityAdapter;
+pub use lantern::LanternAdapter;
+pub use mahsang::MahsangAdapter;
+pub use moav::MoavAdapter;
+pub use psiphon::PsiphonAdapter;
+pub use singbox::SingboxCoreAdapter;
+pub use tor_snowflake::TorSnowflakeCore;
+pub use vless_reality_community::VlessRealityCommunityAdapter;
+pub use xray::XrayCoreAdapter;
+
+// Type aliases for convenience
+pub type SingboxCore = SingboxCoreAdapter;
+pub type SingBoxCore = SingboxCoreAdapter;
+pub type XrayCore = XrayCoreAdapter;
+pub type HiddifyCore = HiddifyCoreAdapter;
+pub type PsiphonCore = PsiphonAdapter;
+pub type LanternCore = LanternAdapter;
+pub type AmneziaVpnCore = AmneziaVpnAdapter;
+pub type DefyxCore = DefyxVpnAdapter;
+pub type MahsangCore = MahsangAdapter;
+pub type MoavCore = MoavAdapter;
+pub type TorSnowflakeCoreAdapter = TorSnowflakeCore;
+pub type Hysteria2CommunityCore = Hysteria2CommunityAdapter;
+pub type VlessRealityCommunityCore = VlessRealityCommunityAdapter;

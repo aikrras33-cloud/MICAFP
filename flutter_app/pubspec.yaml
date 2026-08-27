@@ -1,0 +1,145 @@
+name: unified_shield
+description: Next-generation anti-censorship tool
+version: 9.0.0+900
+
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: '>=3.24.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management — directive §3.22 picks `provider` (drops riverpod).
+  provider: ^6.1.2
+
+  # Background services
+  flutter_background_service: ^5.0.7
+  workmanager: ^0.5.2
+  flutter_foreground_task: ^8.11.0
+
+  # Storage
+  shared_preferences: ^2.3.4
+  flutter_secure_storage: ^9.2.0  # §8 license storage / PIN storage
+
+  # Connectivity & network
+  connectivity_plus: ^6.1.2
+  network_info_plus: ^6.1.0
+
+  # HTTP client — used by ota_updater.dart and downstream REST clients.
+  dio: ^5.4.0
+
+  # Structured logging — used by intranet_service.dart / p2p_service.dart.
+  logger: ^2.0.0
+
+  # Crypto primitives — used by paste_config_screen.dart (AES-GCM + HKDF).
+  crypto: ^3.0.0
+  cryptography: ^2.7.0
+
+  # Battery monitoring
+  battery_plus: ^6.2.1
+
+  # Permissions
+  permission_handler: ^11.3.1
+
+  # URL launcher
+  url_launcher: ^6.3.1
+
+  # Notifications — §8.3 pre-expiry license notifications.
+  flutter_local_notifications: ^17.0.0
+
+  # WiFi & hotspot
+  wifi_iot: ^0.3.19
+
+  # UI utilities
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.1.0  # §6 motion library / typography
+
+  # Animations — §6 motion library.
+  animations: ^2.0.11
+  flutter_animate: ^4.5.0
+
+  # Biometric auth (lock_screen.dart).
+  local_auth: ^2.3.0
+
+  # Path provider (ota_updater.dart, daemon_service.dart).
+  path_provider: ^2.1.4
+
+  # Vibration feedback — §6.4.1 haptic on connect button.
+  vibration: ^2.0.0
+
+  # Speech-to-text — §10.3 voice commands.
+  speech_to_text: ^6.6.0
+
+  # MSIX packaging — §4.1 artifact #9 (Windows store). Optional.
+  msix: ^3.16.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+# IMPORTANT (directive §3.22):
+# `flutter_riverpod`, `freezed`, `freezed_annotation`, `build_runner`
+# are intentionally NOT declared. The unified `flutter_app` tree uses
+# `provider` exclusively and plain Dart classes (no code-gen) for value
+# types — see `models/vpn_state.dart` + `models/core_model.dart`.
+
+# MSIX packaging configuration — directive §3.8 (Windows store artifact #9).
+# Invoked via `flutter pub run msix:create` (or `dart run msix:create`).
+# `msix_version` is pinned to the 4-octet Windows-store form of the
+# global 9.0.0-enterprise version (per §3.17 normalization).
+msix_config:
+  display_name: UnifiedShield
+  publisher_name: UnifiedShield Enterprise
+  identity_name: UnifiedShield
+  msix_version: 9.0.0.0
+  architecture: x64
+  capabilities: internetClientServer,privateNetworkClientServer
+  publisher: CN=UnifiedShield Enterprise, O=UnifiedShield, C=US
+  # `languages` intentionally unset — Flutter's localization generate=true
+  # produces en + fa; MSIX will inherit the host locale at install time.
+
+flutter:
+  uses-material-design: true
+
+  # Localization support — generate AppLocalizations from .arb files
+  # under lib/l10n/ (ported per directive §3.5).
+  generate: true
+
+  fonts:
+    # ── Persian-first enterprise type system (bundled = fully offline,
+    #    no Google Fonts CDN needed — works during Iran internet shutdowns).
+    - family: Vazirmatn
+      fonts:
+        - asset: assets/fonts/Vazirmatn-Regular.ttf
+        - asset: assets/fonts/Vazirmatn-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Vazirmatn-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Vazirmatn-Bold.ttf
+          weight: 700
+    # ── Latin enterprise display face (bundled static instances).
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.otf
+        - asset: assets/fonts/Inter-Light.otf
+          weight: 300
+        - asset: assets/fonts/Inter-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.otf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.otf
+          weight: 700
+    # ── Monospace face for stats / serials / countdown digits.
+    - family: JetBrains Mono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+        - asset: assets/fonts/JetBrainsMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/JetBrainsMono-Bold.ttf
+          weight: 700

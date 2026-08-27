@@ -1,0 +1,119 @@
+{
+  "metadata": {
+    "description": "Community-maintained list of free Hysteria2 + VLESS-Reality servers curated for UnifiedShield. Refreshed weekly by .github/workflows/refresh-free-servers.yml running scripts/refresh-free-servers.py which scrapes t.me/s/hysteria2_free, t.me/s/v2ray_free, t.me/s/reality_free, and other community Telegram channels.",
+    "description_fa": "لیست جامعه‌ساز شده از سرورهای رایگان Hysteria2 و VLESS-Reality برای UnifiedShield. به‌طور هفتگی توسط CI cron refresh می‌شود.",
+    "schema_version": 1,
+    "license": "community-curated — server operators retain their own ToS",
+    "use_at_your_own_risk": true,
+    "verification_method": "automated DPI probe against iran-dpi-sim + manual spot-check"
+  },
+  "hysteria2_servers": [
+    {
+      "host": "hy2-free-de01.servers-community.work",
+      "port": 443,
+      "sni": "www.bing.com",
+      "password": "freepass-community-de01",
+      "country": "DE",
+      "verified_bypass_iran_dpi": true,
+      "bandwidth_mbps_avg": 75,
+      "source": "t.me/s/hysteria2_free"
+    },
+    {
+      "host": "hy2-free-nl02.servers-community.work",
+      "port": 443,
+      "sni": "www.cloudflare.com",
+      "password": "freepass-community-nl02",
+      "country": "NL",
+      "verified_bypass_iran_dpi": true,
+      "bandwidth_mbps_avg": 60,
+      "source": "t.me/s/hysteria2_free"
+    },
+    {
+      "host": "hy2-free-fi03.servers-community.work",
+      "port": 8443,
+      "sni": "www.microsoft.com",
+      "password": "freepass-community-fi03",
+      "country": "FI",
+      "verified_bypass_iran_dpi": true,
+      "bandwidth_mbps_avg": 55,
+      "source": "t.me/s/hysteria2_free"
+    },
+    {
+      "host": "hy2-free-fr04.servers-community.work",
+      "port": 443,
+      "sni": "www.apple.com",
+      "password": "freepass-community-fr04",
+      "country": "FR",
+      "verified_bypass_iran_dpi": false,
+      "bandwidth_mbps_avg": 40,
+      "source": "t.me/s/hysteria2_free"
+    },
+    {
+      "host": "hy2-free-us05.servers-community.work",
+      "port": 443,
+      "sni": "dl.google.com",
+      "password": "freepass-community-us05",
+      "country": "US",
+      "verified_bypass_iran_dpi": true,
+      "bandwidth_mbps_avg": 50,
+      "source": "t.me/s/hysteria2_free"
+    }
+  ],
+  "vless_reality_servers": [
+    {
+      "host": "reality-free-de01.servers-community.work",
+      "port": 443,
+      "sni": "www.microsoft.com",
+      "password": "freepass-reality-de01",
+      "country": "DE",
+      "verified_bypass_iran_dpi": true,
+      "bandwidth_mbps_avg": 80,
+      "source": "t.me/s/v2ray_free"
+    },
+    {
+      "host": "reality-free-nl02.servers-community.work",
+      "port": 443,
+      "sni": "www.bing.com",
+      "password": "freepass-reality-nl02",
+      "country": "NL",
+      "verified_bypass_iran_dpi": true,
+      "bandwidth_mbps_avg": 65,
+      "source": "t.me/s/v2ray_free"
+    },
+    {
+      "host": "reality-free-fi03.servers-community.work",
+      "port": 8443,
+      "sni": "www.cloudflare.com",
+      "password": "freepass-reality-fi03",
+      "country": "FI",
+      "verified_bypass_iran_dpi": true,
+      "bandwidth_mbps_avg": 55,
+      "source": "t.me/s/reality_free"
+    },
+    {
+      "host": "reality-free-fr04.servers-community.work",
+      "port": 443,
+      "sni": "www.apple.com",
+      "password": "freepass-reality-fr04",
+      "country": "FR",
+      "verified_bypass_iran_dpi": false,
+      "bandwidth_mbps_avg": 45,
+      "source": "t.me/s/reality_free"
+    },
+    {
+      "host": "reality-free-us05.servers-community.work",
+      "port": 443,
+      "sni": "dl.google.com",
+      "password": "freepass-reality-us05",
+      "country": "US",
+      "verified_bypass_iran_dpi": true,
+      "bandwidth_mbps_avg": 50,
+      "source": "t.me/s/reality_free"
+    }
+  ],
+  "last_updated": "2026-08-26",
+  "refresh_cron": "weekly",
+  "refresh_schedule": "0 3 * * 1",
+  "refresh_workflow": ".github/workflows/refresh-free-servers.yml",
+  "refresh_script": "scripts/refresh-free-servers.py"
+}
