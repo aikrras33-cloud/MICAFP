@@ -28,7 +28,7 @@ dependencies:
 
   # Connectivity & network
   connectivity_plus: ^6.1.2
-  network_info_plus: ^6.1.0
+  network_info_plus: ^7.0.0
 
   # HTTP client — used by ota_updater.dart and downstream REST clients.
   dio: ^5.4.0
