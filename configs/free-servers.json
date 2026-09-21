@@ -111,7 +111,7 @@
       "source": "t.me/s/reality_free"
     }
   ],
-  "last_updated": "2026-09-14",
+  "last_updated": "2026-09-21",
   "refresh_cron": "weekly",
   "refresh_schedule": "0 3 * * 1",
   "refresh_workflow": ".github/workflows/refresh-free-servers.yml",
